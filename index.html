@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eska's Mind Sprint – Neon Edition</title>
+  <style>
+    :root {
+      --neon-blue: #00e5ff;
+      --neon-pink: #ff2fd1;
+      --bg-black: #000;
+      --card-black: #0b0b0b;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg-black);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .game {
+      background: var(--card-black);
+      padding: 32px;
+      border-radius: 16px;
+      width: 340px;
+      text-align: center;
+      box-shadow:
+        0 0 15px var(--neon-blue),
+        0 0 30px rgba(0, 229, 255, 0.4);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 1.8rem;
+      color: var(--neon-blue);
+      text-shadow: 0 0 10px var(--neon-blue);
+    }
+
+    p {
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+
+    .number {
+      font-size: 2.8rem;
+      letter-spacing: 6px;
+      margin: 24px 0;
+      color: var(--neon-pink);
+      text-shadow: 0 0 12px var(--neon-pink);
+      animation: fadeIn 0.4s ease-in;
+    }
+
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(1.1);
+      }
+    }
+
+    input {
+      padding: 12px;
+      width: 100%;
+      border-radius: 8px;
+      border: 2px solid var(--neon-blue);
+      font-size: 1rem;
+      margin-bottom: 12px;
+      background: #000;
+      color: #fff;
+      outline: none;
+    }
+
+    input:focus {
+      box-shadow: 0 0 10px var(--neon-blue);
+    }
+
+    button {
+      padding: 12px 18px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      background: var(--neon-blue);
+      color: #000;
+      font-weight: bold;
+      box-shadow: 0 0 10px var(--neon-blue);
+    }
+
+    button:hover {
+      background: #5ff3ff;
+    }
+
+    .info {
+      margin-top: 16px;
+      font-size: 0.95rem;
+      min-height: 1.4em;
+    }
+
+    .correct {
+      color: #00ff7f;
+      text-shadow: 0 0 8px #00ff7f;
+    }
+
+    .wrong {
+      color: #ff4d4d;
+      text-shadow: 0 0 8px #ff4d4d;
+    }
+
+    .score {
+      margin-top: 10px;
+      font-weight: bold;
+      color: var(--neon-blue);
+    }
+  </style>
+</head>
+<body>
+  <div class="game" role="application" aria-label="Memory game">
+    <h1>Mind Sprint</h1>
+    <p>Memorise the number before it fades.</p>
+
+    <div id="number" class="number">---</div>
+
+    <input
+      id="guess"
+      type="text"
+      placeholder="Enter the number"
+      disabled
+      aria-label="Number guess"
+    />
+
+    <button id="startBtn">Start Round</button>
+
+    <div class="info" id="info"></div>
+    <div class="score" id="score">Score: 0</div>
+  </div>
+
+  <script>
+    const numberEl = document.getElementById("number");
+    const guessEl = document.getElementById("guess");
+    const infoEl = document.getElementById("info");
+    const scoreEl = document.getElementById("score");
+    const startBtn = document.getElementById("startBtn");
+
+    const correctSound = new Audio(
+      "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA="
+    );
+    const wrongSound = new Audio(
+      "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YQAAAAA="
+    );
+
+    let currentNumber = "";
+    let score = 0;
+
+    function generateNumber(length = 4) {
+      return Array.from({ length }, () => Math.floor(Math.random() * 10)).join("");
+    }
+
+    startBtn.addEventListener("click", () => {
+      infoEl.textContent = "Memorise!";
+      infoEl.className = "info";
+      guessEl.value = "";
+      guessEl.disabled = true;
+
+      currentNumber = generateNumber(4 + Math.floor(score / 3));
+      numberEl.textContent = currentNumber;
+      numberEl.style.animation = "fadeIn 0.3s ease-in";
+
+      setTimeout(() => {
+        numberEl.style.animation = "fadeOut 0.5s forwards";
+      }, 1200);
+
+      setTimeout(() => {
+        numberEl.textContent = "???";
+        numberEl.style.animation = "";
+        guessEl.disabled = false;
+        guessEl.focus();
+        infoEl.textContent = "Type the number and press Enter";
+      }, 1700);
+    });
+
+    guessEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        if (guessEl.value === currentNumber) {
+          score++;
+          infoEl.textContent = "Correct!";
+          infoEl.classList.add("correct");
+          correctSound.play();
+        } else {
+          infoEl.textContent = `Wrong! It was ${currentNumber}`;
+          infoEl.classList.add("wrong");
+          wrongSound.play();
+          score = 0;
+        }
+        scoreEl.textContent = `Score: ${score}`;
+        guessEl.disabled = true;
+        numberEl.textContent = "---";
+      }
+    });
+  </script>
+</body>
+</html>
